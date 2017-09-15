@@ -8,8 +8,7 @@
   angular.module('BlurAdmin.pages.surveys', [
     'BlurAdmin.pages.surveys.create',
     'BlurAdmin.pages.surveys.list',
-  ])
-      .config(routeConfig);
+  ]).config(routeConfig);
 
   /** @ngInject */
   function routeConfig($stateProvider) {
@@ -30,6 +29,11 @@
           sidebarMeta: {
             order: 1000,
           },
+        }).state('surveys.edit', {
+          url: '/edit/:survey_id',
+          templateUrl: 'app/pages/surveys/create/create.html',
+          controller: "CreateTabCtrl",
+          title: 'Edit a survey'
         }).state('surveys.list', {
           url: '/list',
           templateUrl: 'app/pages/surveys/list/list.html',

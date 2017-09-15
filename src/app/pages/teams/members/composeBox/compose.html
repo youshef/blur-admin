@@ -17,11 +17,11 @@
           <div class="col-sm-5">
             <div class="userpic">
               <div class="userpic-wrapper">
-                <img ng-src="{{ boxCtrl.picture }}" ng-click="boxCtrl.uploadPicture()">
+                <img ng-src="{{ boxCtrl.picture }}" ng-click="uploadPicture()">
               </div>
-              <i class="ion-ios-close-outline" ng-click="boxCtrl.removePicture()" ng-if="!boxCtrl.noPicture"></i>
-              <a href class="change-userpic" ng-click="boxCtrl.uploadPicture()">Change Profile Picture</a>
-              <input type="file" ng-show="false" id="uploadFile" ng-file-select="boxCtrl.onFileSelect($files)">
+              <i class="ion-ios-close-outline" ng-click="removePicture()" ng-if="!boxCtrl.noPicture"></i>
+              <a href class="change-userpic" ng-click="uploadPicture()">Change Profile Picture</a>
+              <input type="file" ng-show="false" id="uploadFile" ng-file-select="onFileSelect($files)">
             </div>
           </div>
 
@@ -44,11 +44,8 @@
           <label class="col-sm-3 control-label">Department</label>
 
           <div class="col-sm-9">
-            <select class="form-control" selectpicker>
-              <option>Web Development</option>
-              <option>System Development</option>
-              <option>Sales</option>
-              <option>Human Resources</option>
+            <select class="form-control" multiple ng-model="boxCtrl.member.labels">
+              <option ng-repeat="t in boxCtrl.Labels" value="{{t.label}}">{{t.name}}</option>
             </select>
           </div>
         </div>
@@ -72,7 +69,7 @@
 
 </div>
 <div class="compose-footer clearfix">
-  <button type="button" ng-click="boxCtrl.updateMember()" class="btn btn-send">Save</button>
+  <button type="button" ng-click="boxCtrl.createMember()" class="btn btn-send">Save</button>
 
   <div class="footer-controls">
     <button type="button" ng-click="$dismiss()" class="btn btn-danger">Cancel</button>
