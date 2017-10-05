@@ -20,12 +20,13 @@
 });
 
   /** @ngInject */
-  function ListsTabCtrl($scope, baConfig, membersList, ListService,MemberService, $log, $state,$stateParams) {
+  function ListsTabCtrl($scope, baConfig, ListService,MemberService, $log, $state,$stateParams,appConfig) {
   	var vm = this;
 
   	vm.searchResult = [];
 
     function loadLists() {
+      console.log("appConfig", appConfig)
       ListService
         .list()
         .then(function (data){
@@ -86,7 +87,7 @@
       return colors[i];
     }
 
-    vm.tabs = membersList.getTabs();
+    vm.tabs = appConfig.tabs;
 
     
 
@@ -169,7 +170,7 @@
 	  if (item && item.isChecked) {
 		  	vm.activeList = item;
         vm.errors.noList = false;
-        $state.transitionTo('teams.lists', {id: item.id}, {notify: false});
+        $state.transitionTo('main.teams.lists', {id: item.id}, {notify: false});
 			angular.forEach(vm.Lists, function(list){
 	      	 if(item.id != list.id)
 			   		list.isChecked = false;
@@ -201,7 +202,7 @@
       vm.activeList = {};
       vm.errors.noList = true;
       vm.listMembers = [];
-      $state.transitionTo('teams.lists', {notify: false});
+      $state.transitionTo('main.teams.lists', {notify: false});
     }
 	  	
 	  
@@ -236,6 +237,7 @@
                for (var i = 0; i < members.length; i++) {
                 if(multi == false || (multi == true && members[i].Selected == true)) {
                     var index = list.members.indexOf(members[i].id);
+                    console.log('index', index)  
                      //vm.listMembers = []; 
                      if (action == "add") {
                         if (index == -1)
@@ -248,7 +250,7 @@
                     
                     
                 }
-               
+             console.log('updateMembers:modified members', list.members)  
             vm.activeList.isChecked =  true;
 		        ListService
 		          .edit(list)

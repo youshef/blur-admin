@@ -6,9 +6,8 @@
   'use strict';
 
   angular.module('BlurAdmin.pages.surveys.create',['BlurAdmin.pages.surveys', 'ui.select', 'ngSanitize', 'textAngular', 'ngTagsInput'])
-      .directive('tagInput', tagInput)
       .config(function($provide){
-        $provide.decorator('taOptions', ['taRegisterTool', '$delegate', function(taRegisterTool, taOptions){
+        $provide.decorator('taOptions', ['taRegisterTool', '$delegate', 'appConfig', function(taRegisterTool, taOptions, appConfig){
           // $delegate is the taOptions we are decorating
           // register the tool with textAngular
           function insertTextAtCursor(text) {
@@ -42,6 +41,10 @@
                     }
                 }
 
+                function getAppConfig(appConfig) {
+                    return appConfig
+                }
+
           taRegisterTool('userName', {
             iconclass: "fa fa-user",
             tooltiptext: "Insert the member name",
@@ -58,23 +61,39 @@
                 return moveCaret(1);
             }
           });
+
+          taRegisterTool('360Model', {
+            iconclass: "fa fa-circle-o-notch",
+            tooltiptext: "Insert a 360 survey text model",
+            action: function(){
+                //var appConfig = getAppConfig()
+                return this.$editor().wrapSelection('insertHTML', appConfig.emailContentModels.s_360, true);
+            }
+          });
+
+          taRegisterTool('regularModel', {
+            iconclass: "fa fa-file",
+            tooltiptext: "Insert a regular survey text model",
+            action: function(){
+              //var appConfig = getAppConfig()
+                return this.$editor().wrapSelection('insertHTML', appConfig.emailContentModels.s_regular, true);
+            }
+          });
+
+          taRegisterTool('incognitoModel', {
+            iconclass: "fa fa-eye-slash",
+            tooltiptext: "Insert an incognito survey text model",
+            action: function(){
+              //var appConfig = getAppConfig()
+                return this.$editor().wrapSelection('insertHTML', appConfig.emailContentModels.s_incognito, true);
+            }
+          });
           // add the button to the default toolbar definition
           taOptions.toolbar[1].push('colourRed');
           return taOptions;
         }]);
       }); 
 
-  function tagInput() {
-    return {
-      restrict: 'A',
-      link: function( $scope, elem, attr) {
-        console.log("tagInput", $scope);
-        $(elem).tagsinput({
-          tagClass:  'label label-' + attr.tagInput,
-          val: 'test'
-        });
-      }
-    };
-  }
+  
 
 })();

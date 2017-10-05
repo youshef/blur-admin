@@ -8,8 +8,8 @@
     .factory('SurveyService',SurveyService);
 
   /** @ngInject */
-  function SurveyService($http, $q) {
-    var apiBaseUrl = "http://localhost:9000"
+  function SurveyService($http, $q, appConfig) {
+    var apiBaseUrl = appConfig.apiBaseUrl
     var endpoint = apiBaseUrl + "/surveys";
 
     function list(params) {
@@ -32,7 +32,7 @@
     function get(id) {
 
       var deferred = $q.defer();
-      $http.get(endpoint)
+      $http.get(endpoint + "/" + id)
        .success(function(data) { 
           deferred.resolve(data);
        }).error(function(msg, code) {
@@ -42,11 +42,15 @@
      return deferred.promise;
 
 
-      return $http.get(endpoint, id);
+      return $http.get(endpoint + "/" + id);
     }
 
     function create(survey) {
       return $http.post(endpoint, survey);
+    }
+
+    function send(survey) {
+      return $http.get(endpoint + "/" + survey.id + "/send");
     }
 
     function update(survey) {
@@ -62,7 +66,8 @@
       get:get,
       create:create,
       update:update,
-      remove:remove
+      remove:remove,
+      send:send
     }
   }
 })();
