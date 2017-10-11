@@ -21,18 +21,21 @@
           sidebarMeta: {
             order: 0,
           },
+          authenticate: true
         }).state('main.teams.members.label', {
           url: '/:label',
           templateUrl: 'app/pages/teams/members/membersListing/membersList.html',
           title: 'Members',
           controller: "MembersListCtrl",
-          controllerAs: "listCtrl"
+          controllerAs: "listCtrl",
+          authenticate: true
         }).state('main.teams.members.detail', {
           url: '/:id',
           templateUrl: 'app/pages/teams/members/detail/memberDetail.html',
           title: 'Detail',
           controller: "MemberDetailCtrl",
-          controllerAs: "detailCtrl"
+          controllerAs: "detailCtrl",
+          authenticate: true
         });
     $urlRouterProvider.when('/main/teams/members','/main/teams/members/listing');
   }

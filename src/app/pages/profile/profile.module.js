@@ -16,6 +16,7 @@
           title: 'Profile',
           templateUrl: 'app/pages/profile/profile.html',
           controller: 'ProfilePageCtrl',
+          authenticate: true
         });
   }
 

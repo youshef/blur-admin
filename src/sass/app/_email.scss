@@ -248,7 +248,7 @@
 }
 
 .mail-panel .mail-navigation-container .tag {
-  font-size: 20px;
+  font-size: 18px;
     font-weight: 300;
     width: 159px;
     text-transform: capitalize;
@@ -261,13 +261,18 @@
   cursor: pointer;
   display: inline-block;
   margin-right: 3px;
+  background-color: $danger-bg;
   &.label {
     padding: .2em .5em;
     border-radius: 2px;
     line-height: 1.1;
   }
-  &.tech {
+  &.management {
     background-color: $primary;
+  }
+
+  &.tech {
+    background-color: $success;
   }
 
   &.product {
@@ -275,23 +280,23 @@
   }
 
   &.finance {
-    background-color: $success;
+    background-color: $danger;
   }
 
   &.media {
-    background-color: $danger;
+    background-color: $primary-dark;
   }
 
   &.hr {
-    background-color: $danger;
+    background-color: $info-dark;
   }
 
   &.shops {
-    background-color: $danger;
+    background-color: $success-dark;
   }
 
   &.innovation {
-    background-color: $danger;
+    background-color: $warning-dark;
   }
 }
 

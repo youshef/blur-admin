@@ -19,6 +19,7 @@
 		        <div class="panel-heading">
 		        	{{ vm.activeSurvey.name }}
 		        	<button type="button" class="btn btn-default btn-with-icon pull-right" ng-click="vm.printPdf()" style="margin-top:-9px"><i class="ion-stats-bars"></i>Export as PDF</button>
+		        	<button type="button" class="btn btn-default btn-with-icon pull-right" ng-click="vm.printExcel()" style="margin-top:-9px"><i class="ion-stats-bars"></i>Export as XLSX</button>
 		        </div>
 		        <div class="panel-body">
 
@@ -61,6 +62,7 @@
 		        <div class="panel-heading">
 		        	{{ vm.activeSurvey.name }}
 		        	<button type="button" class="btn btn-default btn-with-icon pull-right" ng-click="vm.printPdf()" style="margin-top:-9px"><i class="ion-stats-bars"></i>Export as PDF</button>
+		        	<button type="button" class="btn btn-default btn-with-icon pull-right" ng-click="vm.printExcel()" style="margin-top:-9px"><i class="ion-stats-bars"></i>Export as XLSX</button>
 		        </div>
 		        <div class="panel-body">
 
@@ -69,7 +71,7 @@
 				                
 
 				                <canvas id="bar" class="chart chart-bar"
-				                        chart-data="vm.s360Analysis.overall.data" chart-labels="vm.s360Analysis.overall.labels" chart-options="vm.s360ChartOption">
+				                        chart-data="vm.s360Analysis.overall.data" chart-labels="vm.s360Analysis.overall.labels" chart-options="vm.s360BarChartOption">
 				                </canvas>
 
 				            </div>
@@ -123,7 +125,7 @@
 
 				            <div class="chartjs-canvas-holder-first-row" style="width: 100%;margin:0 auto;" ng-if="vm.activeSurvey.type == 's_360'">
 				                <canvas id="bar" class="chart chart-bar"
-				                        chart-data="vm.s360Analysis.lists[e._id].data" chart-labels="vm.s360Analysis.lists[e._id].labels" chart-options="vm.s360ChartOption">
+				                        chart-data="vm.s360Analysis.lists[e._id].data" chart-labels="vm.s360Analysis.lists[e._id].labels" chart-options="vm.s360BarChartOption">
 				                </canvas>
 				            </div>
 				        
@@ -175,33 +177,54 @@
 
 
 <uib-tab heading="Individual report" ng-if="vm.activeSurvey.type == 's_360'">
-  	
-  	 <div class="form-group ">
-    <ui-select ng-model="vm.selectedMember"
-               class="btn-group bootstrap-select form-control"
-               ng-disabled="false"
-               append-to-body="true"
-               search-enabled="true"
-               ng-change="selectedMemberChange()">
-      <ui-select-match placeholder="Select With Search">
-        {{$select.selected.name}}
-      </ui-select-match>
-      <ui-select-choices
-          repeat="withSearchItem in vm.members | filter: $select.search">
-        <span ng-bind-html="withSearchItem.name"></span>
-      </ui-select-choices>
-    </ui-select>
-  </div>
+ <div class="row"> 	
+  	 <div class="form-group  col-md-6">
+	    <ui-select ng-model="vm.selectedMember"
+	               class="btn-group bootstrap-select form-control"
+	               ng-disabled="false"
+	               append-to-body="true"
+	               search-enabled="true"
+	               ng-change="selectedMemberChange()">
+	      <ui-select-match placeholder="Select With Search">
+	        {{$select.selected.name}}
+	      </ui-select-match>
+	      <ui-select-choices
+	          repeat="withSearchItem in vm.members | filter: $select.search">
+	        <span ng-bind-html="withSearchItem.name"></span>
+	      </ui-select-choices>
+	    </ui-select>
+  	</div>
 
+  	<div class="control-group  col-md-6">
+                      <span class="control-label" style="display: inline-block;position: relative;;margin-right: 25px;">Chart type : </span>
+                      <label class="radio-inline custom-radio nowrap">
+                        <input type="radio" name="graphType" ng-model="vm.graphType" value="bars">
+                        <span>Bars</span>
+                      </label>
+                      <label class="radio-inline custom-radio nowrap">
+                        <input type="radio" name="graphType" ng-model="vm.graphType" value="radar">
+                        <span>Radar</span>
+                      </label>
+           
+                      
+                    </div>
+</div>
   		<div class="row">
 		  <div class="col-md-12">
 
 		    
 				            <div class="chartjs-canvas-holder-first-row" style="width: 100%;margin:0 auto;">
-				                <canvas id="bar" class="chart chart-bar"
-				                        chart-data="vm.s360Analysis.individual.data[vm.selectedMember.id]" chart-labels="vm.s360Analysis.individual.labels" chart-options="vm.s360ChartOption" chart-series="vm.series">
+				                <canvas id="bar" ng-if="vm.graphType == 'bars'" class="chart chart-bar"
+				                        chart-data="vm.s360Analysis.individual.data[vm.selectedMember.id]" chart-labels="vm.s360Analysis.individual.labels" chart-options="vm.s360IndividualBarChartOption" chart-series="vm.series">
 				                </canvas>
+
+				                <canvas id="radar" ng-if="vm.graphType == 'radar'" class="chart chart-radar" 
+				                		chart-data="vm.s360Analysis.individual.data[vm.selectedMember.id]" chart-labels="vm.s360Analysis.individual.labels" 
+				                		chart-options="vm.s360RadarChartOption" chart-series="vm.series">
+						        </canvas>
+
 				            </div>
+
 
 		  </div>
 		</div>
@@ -237,6 +260,7 @@
 		        <div class="panel-heading">{{ answer.question.text }} <b ng-if="vm.activeSurvey.type == 's_360'">({{ answer.evaluated.name }})</b></div>
 		        <div class="panel-body">
 		        		{{ answer.value }}
+		        		<span ng-if="answer.comment && answer.comment != ''">{{answer.comment}}</span>
 		        </div>
 		      </div>
 

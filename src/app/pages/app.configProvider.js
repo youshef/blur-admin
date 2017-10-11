@@ -13,6 +13,16 @@
 
   // main functional color scheme
   var tags = [
+          "Satisfaction",
+          "Motivation",
+          "Loyauté",
+          "Engagement",
+          "Impact",
+          "Objectif et followup",
+          "Feedback et reconnaissance",
+          "Améliorations systématiques",
+          "Challenge et développement",
+          "Réputation",
           "Share of expertise with the company" ,
           "Acceptable work demands" ,
           "Good relations with management" ,
@@ -75,7 +85,7 @@
       tags : tags,
       survey : survey,
       series : series,
-      tabs:tabs
+      tabs : tabs
     };
 
     conf.$get = function () {
