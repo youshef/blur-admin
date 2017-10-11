@@ -31,7 +31,7 @@
 
                   localStorage.setObject('user', data.user);
                   localStorage.setObject('token', data.token);
-                  $state.go('main.dashboard');
+                  $state.go('main.surveys.list');
               }
               console.log("AuthService loggedin",data)
             },

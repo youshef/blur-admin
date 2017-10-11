@@ -3,7 +3,9 @@
   .al-main {margin-left:0 !important;}
 </style>
 
-<div class="row" ng-if="vm.alreadyAnswered">
+<div class="row" ng-if="vm.alreadyAnswered" style="
+    padding: 20px;
+">
 <div class="col-md-12"
          ba-panel
          ba-panel-title="Avito Surveys"
@@ -17,7 +19,9 @@
     </div>
 </div>
 
-<div class="row" ng-if="!vm.isMemberIlligible">
+<div class="row" ng-if="!vm.isMemberIlligible" style="
+    padding: 20px;
+">
 <div class="col-md-12"
          ba-panel
          ba-panel-title="Avito Surveys"
@@ -31,7 +35,9 @@
     </div>
 </div>
 
-<div class="row" ng-if="vm.error">
+<div class="row" ng-if="vm.error" style="
+    padding: 20px;
+">
 <div class="col-md-12"
          ba-panel
          ba-panel-title="Avito Surveys"
@@ -60,21 +66,22 @@
                       <ng-form name="innerForm">
                         <div class="member-survey">
                           <div class="separator"></div>
-                          <div id="{{e.id}}" class="form-group answer" ng-repeat="e in vm.survey.elements"
-                            ng-init="elementId = vm.survey.id+'_'+memberId+'_'+vm.activeMemberId+'_'+e._id" ng-class="{'has-error': innerForm[elementId].$invalid && (vm.forms[memberId].$submitted)}">
-                            <input type="hidden" name="{{ elementId }}_submitted" ng-model="vm.innerForm[elementId].submitted" ng-value="false"/>
-                            <p>{{ e.text }}</p>
-                              <label ng-class="el.multiple ? 'custom-checkbox radio-checkbox  nowrap' : 'custom-radio radio-inline  nowrap'" ng-repeat="el in e.items">
-                                <input ng-attr-type="{{el.multiple? 'checkbox' : 'radio'}}" name="{{elementId}}"  ng-model="vm.innerForm[elementId].$viewValue" ng-value="el.value" ng-attr-required="{{el.required}}">
-                                <span>{{ el.value }}</span>
-                              </label>
-                              <br><br>
-                              <div class="form-group" ng-if="e.hasComment">
-                                <label for="{{ e._id }}_comment">{{e.commentLabel}}</label>
-                                <input type="text" class="form-control" name="{{ elementId }}_comment" ng-model="vm.innerForm[elementId].comment" placeholder="..." ng-attr-required="{{e.commentIsRequired}}">
+                            <div ba-panel ba-panel-title="{{ge[0].tag}}" ng-repeat="ge in vm.survey.goupedElements">
+                              <div id="{{e.id}}" class="form-group answer" ng-repeat="e in ge"
+                                ng-init="elementId = vm.survey.id+'_'+memberId+'_'+vm.activeMemberId+'_'+e._id" ng-class="{'has-error': innerForm[elementId].$invalid && (vm.forms[memberId].$submitted)}">
+                                <input type="hidden" name="{{ elementId }}_submitted" ng-model="vm.innerForm[elementId].submitted" ng-value="false"/>
+                                <p>{{ e.text }}</p>
+                                  <label ng-class="el.multiple ? 'custom-checkbox radio-checkbox  nowrap' : 'custom-radio radio-inline  nowrap'" ng-repeat="el in e.items">
+                                    <input ng-attr-type="{{el.multiple? 'checkbox' : 'radio'}}" name="{{elementId}}"  ng-model="vm.innerForm[elementId].$viewValue" ng-value="el.value" ng-attr-required="{{el.required}}">
+                                    <span>{{ el.value }}</span>
+                                  </label>
+                                  <br><br>
+                                  <div class="form-group" ng-if="e.hasComment">
+                                    <label for="{{ e._id }}_comment">{{e.commentLabel}}</label>
+                                    <input type="text" class="form-control" name="{{ elementId }}_comment" ng-model="vm.innerForm[elementId].comment" placeholder="..." ng-attr-required="{{e.commentIsRequired}}">
+                                  </div>
                               </div>
-                              <div class="separator"></div>
-                          </div>
+                            </div>
                         </div>
                         </ng-form>
                       </form>
@@ -97,22 +104,23 @@
                         <div class="member-survey">
                           <h3 class="member-full-name" ng-if="vm.survey.type == 's_regular'">{{ vm.askedMember.name }}</h3>
                           <div class="separator" ng-if="vm.survey.type == 's_regular'"></div>
-                          <div id="{{e.id}}" class="form-group answer" ng-repeat="e in vm.survey.elements"
-                            ng-init="elementId = e._id" ng-class="{'has-error': regularForm[elementId].$invalid && (vm.forms[vm.activeMemberId].$submitted)}">
+                            <div ba-panel ba-panel-title="{{ge[0].tag}}" ng-repeat="ge in vm.survey.goupedElements">
+                              <div id="{{e.id}}" class="form-group answer" ng-repeat="e in ge"
+                                ng-init="elementId = e._id" ng-class="{'has-error': regularForm[elementId].$invalid && (vm.forms[vm.activeMemberId].$submitted)}">
+                                
+                                <p>{{ e.text }}</p>
+                                  <label ng-class="el.multiple ? 'custom-checkbox radio-checkbox  nowrap' : 'custom-radio radio-inline  nowrap'" ng-repeat="el in e.items">
+                                    <input ng-attr-type="{{el.multiple? 'checkbox' : 'radio'}}" name="{{elementId}}"  ng-model="vm.formData[elementId].value" ng-value="el.value" ng-attr-required="{{el.required}}">
+                                    <span>{{ el.value }}</span>
+                                  </label>
+                                  <br><br>
+                                  <div class="form-group" ng-if="e.hasComment">
+                                    <label for="{{ e._id }}_comment">{{e.commentLabel}}</label>
+                                    <input type="text" class="form-control" name="{{ elementId }}_comment" ng-model="vm.formData[elementId].comment" placeholder="..." ng-attr-required="{{e.commentIsRequired}}">
+                                  </div>
                             
-                            <!--<input type="hidden" name="{{ elementId }}_question" ng-model="vm.innerForm[elementId].question.$viewValue" ng-value="e"/>-->
-                            <p>{{ e.text }}</p>
-                              <label ng-class="el.multiple ? 'custom-checkbox radio-checkbox  nowrap' : 'custom-radio radio-inline  nowrap'" ng-repeat="el in e.items">
-                                <input ng-attr-type="{{el.multiple? 'checkbox' : 'radio'}}" name="{{elementId}}"  ng-model="vm.formData[elementId].value" ng-value="el.value" ng-attr-required="{{el.required}}">
-                                <span>{{ el.value }}</span>
-                              </label>
-                              <br><br>
-                              <div class="form-group" ng-if="e.hasComment">
-                                <label for="{{ e._id }}_comment">{{e.commentLabel}}</label>
-                                <input type="text" class="form-control" name="{{ elementId }}_comment" ng-model="vm.formData[elementId].comment" placeholder="..." ng-attr-required="{{e.commentIsRequired}}">
                               </div>
-                              <div class="separator"></div>
-                          </div>
+                            </div>
                         </div>
 
                         <nav>

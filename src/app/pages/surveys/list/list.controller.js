@@ -15,6 +15,7 @@
         .then(function (data){
 					vm.surveys = data;
           getSurveyCompletion();
+          groupElementsByTag();
 					$log.info("Got the survey data",data);
         }, function (error){
           $log.error(error);
@@ -59,6 +60,8 @@
       
       s.list = []
       s.respondents = []
+      s.answers = []
+      s.goupedElements = []
       s.sent = []
       s.notSent = []
             SurveyService
@@ -119,36 +122,56 @@
 
     function printPdf(){
                 console.log('printing pdf...');
-                getPDF().then(function(response){
-                    console.log(response);
+                getFile('pdf').then(function(response){
+                    //console.log(response);
                     window.open(response);
                 },function(err){
                     console.log('Error: ' + err);
                 });
             };
 
-     function getPDF(){
+    function printExcel(){
+                console.log('printing excel...');
+                getFile('xlsx').then(function(response){
+                    //console.log(response);
+                    window.open(response);
+                },function(err){
+                    console.log('Error: ' + err);
+                });
+            };
+
+     function getFile(type){
                 vm.loading = true;
                 var q = $q.defer();
-                var endpoint = appConfig.apiBaseUrl+'/pdf/regular';
-                $http.defaults.headers.common['content-type']= 'application/pdf';
+                var contentType = (type == 'pdf') ? 'application/pdf' : 'application/vnd.ms-excel'
+                var endpoint = appConfig.apiBaseUrl+'/files/'+type;
+                $http.defaults.headers.common['content-type'] = contentType;
 
                 var paramz = {}
                 paramz.survey = vm.activeSurvey.id
-                paramz.survey_type = vm.activeSurvey.type
-                paramz.survey_summary_labels = vm.activeSurvey.type == "s_360" ? vm.s360Analysis.overall.labels.join(', ') : vm.regularAnalysis.overall.labels.join(', ');
-                paramz.survey_summary_data = vm.activeSurvey.type == "s_360" ? vm.s360Analysis.overall.data.join(', ') : vm.regularAnalysis.overall.data.join(', ');
-
+                if (type == 'pdf') {
+                   paramz.survey_type = vm.activeSurvey.type
+                   paramz.survey_summary_labels = vm.activeSurvey.type == "s_360" ? vm.s360Analysis.overall.labels.join(', ') : vm.regularAnalysis.overall.labels.join(', ');
+                   paramz.survey_summary_data = vm.activeSurvey.type == "s_360" ? vm.s360Analysis.overall.data.join(', ') : vm.regularAnalysis.overall.data.join(', ');
+                }
                // paramz.lists_summary_labels = vm.activeSurvey.type == "s_360" ? vm.s360Analysis.lists.labels.join(', ') : vm.regularAnalysis.overall.labels.join(', ');
                // paramz.lists_summary_data = vm.activeSurvey.type == "s_360" ? vm.s360Analysis.lists.data.join(', ') : vm.regularAnalysis.overall.data.join(', ');
 
-                $http.get(endpoint, {params : paramz, responseType:'arraybuffer'})
+                $http.get(endpoint, {params : paramz, responseType : 'arraybuffer'})
                         .success(function (response) {
-                            console.log(response);
-                            var file = new Blob([response], {type: 'application/pdf'});
+                            //console.log(response);
+                            var file = new Blob([response], {type: contentType});
                             var fileURL = URL.createObjectURL(file);
                             vm.loading = false;
-                            q.resolve(fileURL);
+                            if (type == 'pdf')
+                              q.resolve(fileURL);
+                            else {
+                              var anchor = document.createElement("a");
+                              anchor.download = "report.xlsx";
+                              anchor.href = fileURL;
+                              anchor.click();
+                            }
+                             
                         })
                         .error(function(err){
                             vm.loading = false;
@@ -159,7 +182,8 @@
 
     function analyzeSurvey(survey) {
       var params = {"survey":survey.id}
-      AnswerService
+      if(survey.completion && survey.completion > 0) {
+        AnswerService
         .analyze(params)
         .then(function (data){
           vm.analysis = data;
@@ -175,6 +199,9 @@
         }, function (error){
           $log.error(error);
         });
+      } else
+        toastr.error('No enough data to analyse :(', 'Surveys', vm.errorToastrOptions)
+      
     }
 
     function getRespondents(survey) {
@@ -220,24 +247,43 @@
           var data = {}
           data.labels = []
           data.data = []
-          angular.forEach(vm.activeSurvey.elements, function(element) {
-            data.labels.push(element.tag)
-          })
-          angular.forEach(labels, function(label, el) {
+
+          angular.forEach(vm.activeSurvey.goupedElements, function(elements) {
+            var grouped = elements.length > 1 ? true : false;
+            var tmpAvg = 0
+            var tag = ''
+            angular.forEach(elements, function(el) {
+              tag = (el.tag) ? el.tag : el.text
+              if (grouped == false)
+                data.labels.push(tag)
+              
+              
               var elemSum = 0
               var i = 0
               angular.forEach(listData.data, function(asked, a) {
                 var askedSum = 0
                 angular.forEach(asked, function(evaluated, e) {
-                  elemSum = elemSum + evaluated[el]
+                  elemSum = elemSum + evaluated[el._id]
                   i++
                 })
 
               })
               var avg = elemSum / i
-              //console.log("element, elemSum, i, avg",el, elemSum, i, avg)
-              data.data.push(avg);
+              
+              if (grouped == false)
+                data.data.push(avg);
+              else
+                tmpAvg = tmpAvg + avg
+
+            })
+            if (grouped == true) {
+              data.labels.push(tag)
+              tmpAvg = tmpAvg / elements.length
+              data.data.push(tmpAvg);
+            }
           })
+
+          //console.log("gets360Data, data",data)
           return data;
 
       }
@@ -249,15 +295,24 @@
           var data = {}
           data.labels = []
           data.data = []
-          angular.forEach(vm.activeSurvey.elements, function(element) {
-            data.labels.push(element.tag)
-          })
+          
           var tempAskedData = []
           var othersData = []
+
+
           angular.forEach(listData.data, function(askd, as) {
             tempAskedData[as] = []
             othersData[as] = []
-            angular.forEach(labels, function(label, el) {
+            angular.forEach(vm.activeSurvey.goupedElements, function(elements) {
+            var grouped = elements.length > 1 ? true : false;
+            var tmpAvg = 0
+            var tmpMyVal = 0
+            var tag = ''
+            angular.forEach(elements, function(el) {
+                tag = (el.tag) ? el.tag : el.text
+                if (grouped == false)
+                  data.labels.push(tag)
+
                 var elemSum = 0
                 var myVal = 0
                 var i = 0
@@ -267,22 +322,39 @@
                     //others evaluation
                     if(e == as) {
                       i++
-                      elemSum = elemSum + evaluated[el]
+                      elemSum = elemSum + evaluated[el._id]
                     } 
                     //auto evaluation
                     if (e == as && e == a)
-                      myVal = evaluated[el]
+                      myVal = evaluated[el._id]
                     
                   })
 
                 })
                 var avg = elemSum / i
                 
-                othersData[as].push(avg);
-                tempAskedData[as].push(myVal);
+                if (grouped == false) {
+                  othersData[as].push(avg);
+                  tempAskedData[as].push(myVal);
+                } else {
+                  tmpMyVal = tmpMyVal + myVal;
+                  tmpAvg = tmpAvg + avg;
+                }
+                  
 
               })
+              if (grouped == true) {
+                data.labels.push(tag)
+                tmpAvg = tmpAvg / elements.length
+                tmpMyVal = tmpMyVal / elements.length
+                othersData[as].push(tmpAvg);
+                tempAskedData[as].push(tmpMyVal);
+              }
             })
+
+
+
+          })
           //merging all together
           //console.log("here",othersData)
           angular.forEach(listData.data, function(askd, as) {
@@ -323,27 +395,59 @@
           data.labels = []
           data.data = []
 
-          angular.forEach(vm.activeSurvey.elements, function(element) {
+          angular.forEach(vm.activeSurvey.goupedElements, function(elements) {
+            var grouped = elements.length > 1 ? true : false;
+            var tmpPercent = 0
+            var tag = ''
+            angular.forEach(elements, function(element) {
+              tag = (element.tag) ? element.tag : element.text
+              if (grouped == false)
+                data.labels.push(tag)
               
-              if (element.tag)
-                data.labels.push(element.tag)
-              else 
-                data.labels.push(element.text)
-
               var perfectScore = listData.respondents.length * element.items.length //totalParticip * nbrChoix
               // nobreReponseN * coeficientN + ...
               var totalScore = 0;
               for ( var i = 0, _len = listData.data[element._id].length; i < _len; i++ ) {
-                  totalScore += listData.data[element._id][i] * (i+1)
+                    totalScore += listData.data[element._id][i] * (i+1)
               }
               var percent = totalScore * 100 / perfectScore
-              data.data.push(percent);
-              //console.log("listData.data[element._id], perfectScore, totalScore, percent", listData.data[element._id], perfectScore, totalScore, percent)
+              if (grouped == false)
+                data.data.push(percent);
+              else 
+                tmpPercent = tmpPercent + percent
             })
-
+            if (grouped == true) {
+              data.labels.push(tag)
+              tmpPercent = tmpPercent / elements.length
+              data.data.push(tmpPercent);
+            }
+          })
+          
+          console.log("getRegularData : ", data)
+          
           return data;
 
       }
+
+      function groupElementsByTag() {
+        angular.forEach(vm.surveys, function(survey, key) {
+            var goupedElements = []
+            var groupedTag = []
+            angular.forEach(survey.elements, function(element, key) {  
+                var tmpGoupedElements = $filter('filter')(survey.elements, {'tag':element.tag})
+                if (tmpGoupedElements.length > 1 && (groupedTag.indexOf(element.tag) == -1)) {
+                    groupedTag.push(element.tag);
+                    goupedElements.push(tmpGoupedElements);
+                } else if (tmpGoupedElements.length < 2)
+                    goupedElements.push(tmpGoupedElements);
+            })
+
+            survey.goupedElements = goupedElements;
+        })
+        
+        //console.log("groupElementsByTag-groupedTag", groupedTag)
+        //console.log("groupElementsByTag-goupedElements", goupedElements)
+    }
 
     function activate(){
 			vm.surveys = [];
@@ -355,15 +459,14 @@
       vm.editSurvey = editSurvey;
       vm.removeSurvey = removeSurvey;
       vm.printPdf = printPdf;
+      vm.printExcel = printExcel;
       vm.duplicateSurvey = duplicateSurvey;
       vm.resendSurvey = resendSurvey;
+      vm.graphType = 'bars';
 
-      vm.s360ChartOption = {
-        scales: {
-            
+      var s360Scales = {     
             yAxes: [{
               ticks: {
-            
                    min: 0,
                    max: 10,
                    callback: function(value){return value}
@@ -372,6 +475,34 @@
                    display: false
                 }
             }]
+        };
+
+      vm.s360IndividualBarChartOption = {
+        scales: s360Scales,
+        legend: {
+                  display: true,
+                  position:'bottom'
+              }
+      };
+      vm.s360BarChartOption = {
+        scales: s360Scales,
+        legend: {
+                  display: false
+              }
+      };
+
+      vm.s360RadarChartOption = {
+        scale: {
+          ticks: {
+            beginAtZero: true,
+          },
+          pointLabels: {
+            fontSize: 13
+          }
+        },
+        legend: {
+          display: true,
+          position: 'left'
         }
       };
 

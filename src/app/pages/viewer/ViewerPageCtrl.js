@@ -24,10 +24,12 @@
           var alreadyAnswered = checkIfAlreadyAnswered();
           var isMemberIlligible = checkIfIlligible();
           //building forms elements
+
+          groupElementsByTag();
           
           if (!alreadyAnswered && isMemberIlligible) {
             angular.forEach(vm.survey.list, function(list, key) {  
-              console.log("list",list);
+              //console.log("list",list);
               angular.forEach(list.members, function(member, key) {
                 //console.log("member",member); 
                 vm.forms[member.id] = {};
@@ -36,12 +38,8 @@
                 if(member.id != vm.activeMemberId) {
                   member.last = false;
                   vm.members.push(member);
-
-                  
                 } else 
                   vm.askedMember = member;
-                
-                //.push(k + ': ' + member);
                 });
               
               });
@@ -64,6 +62,23 @@
           vm.error = true;
           $log.error(error);
         });
+    }
+
+    function groupElementsByTag() {
+        var goupedElements = []
+        var groupedTag = []
+        angular.forEach(vm.survey.elements, function(element, key) {  
+            var tmpGoupedElements = $filter('filter')(vm.survey.elements, {'tag':element.tag})
+            if (tmpGoupedElements.length > 1 && (groupedTag.indexOf(element.tag) == -1)) {
+                groupedTag.push(element.tag);
+                goupedElements.push(tmpGoupedElements);
+            } else if (tmpGoupedElements.length < 2)
+                goupedElements.push(tmpGoupedElements);
+        })
+
+        vm.survey.goupedElements = goupedElements;
+        //console.log("groupElementsByTag-groupedTag", groupedTag)
+        //console.log("groupElementsByTag-goupedElements", goupedElements)
     }
 
     function checkIfAlreadyAnswered() {

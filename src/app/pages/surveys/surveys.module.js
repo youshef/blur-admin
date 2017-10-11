@@ -21,6 +21,7 @@
           	icon: 'ion-gear-a',
             order: 1000,
           },
+          authenticate: true
         }).state('main.surveys.create', {
           url: '/create',
           templateUrl: 'app/pages/surveys/create/create.html',
@@ -29,11 +30,13 @@
           sidebarMeta: {
             order: 1000,
           },
+          authenticate: true
         }).state('main.surveys.edit', {
           url: '/edit/:survey_id',
           templateUrl: 'app/pages/surveys/create/create.html',
           controller: "CreateTabCtrl",
-          title: 'Edit a survey'
+          title: 'Edit a survey',
+          authenticate: true
         }).state('main.surveys.list', {
           url: '/list',
           templateUrl: 'app/pages/surveys/list/list.html',
@@ -42,6 +45,7 @@
           sidebarMeta: {
             order: 2000,
           },
+          authenticate: true
         });
   }
 
@@ -89,8 +93,8 @@
                     fontColor: layoutColors.defaultText
                 },
                 ticks: {
-                    maxTicksLimit: 5,
-                    display: false
+                    //maxTicksLimit: 5,
+                    display: true
                 }
             }
         });

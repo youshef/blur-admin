@@ -14,7 +14,7 @@
       .state('main', {
         url: '/main',
         templateUrl: 'app/pages/main/main.html',
-        redirectTo: 'main.dashboard',
+        redirectTo: 'main.surveys.list',
         authenticate: true
 
 
